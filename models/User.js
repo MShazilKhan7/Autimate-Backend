@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const userShcema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     email: {
       type: String,
@@ -31,8 +31,8 @@ const userShcema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    verficationToken: String,
-    verficationTokenExpiresAt: Date,
+    verificationToken: String,
+    verificationTokenExpiresAt: Date,
     clientToken: String,
     clientTokenExpiresAt: Date,
     resetPasswordToken: String,
@@ -40,4 +40,4 @@ const userShcema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("User", userShcema);
+export default mongoose.model("User", userSchema);

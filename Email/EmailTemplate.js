@@ -1,4 +1,4 @@
-const Verification_Email_Template = `
+export const Verification_Email_Template = `
   <!DOCTYPE html>
   <html lang="en">
   <head>
@@ -222,7 +222,7 @@ const Verification_Email_Template = `
   </html>
 `;
 
-const Welcome_Email_Template = `
+export const Welcome_Email_Template = `
   <!DOCTYPE html>
   <html lang="en">
   <head>
@@ -518,7 +518,7 @@ const Welcome_Email_Template = `
 `;
 
 // Basic Simple Templates (Alternative)
-const Basic_Verification_Template = `
+export const Basic_Verification_Template = `
   <!DOCTYPE html>
   <html>
   <head>
@@ -560,7 +560,7 @@ const Basic_Verification_Template = `
   </html>
 `;
 
-const Basic_Welcome_Template = `
+export const Basic_Welcome_Template = `
   <!DOCTYPE html>
   <html>
   <head>
@@ -601,10 +601,3 @@ const Basic_Welcome_Template = `
   </body>
   </html>
 `;
-
-module.exports = { 
-  Welcome_Email_Template, 
-  Verification_Email_Template,
-  Basic_Welcome_Template,
-  Basic_Verification_Template 
-};

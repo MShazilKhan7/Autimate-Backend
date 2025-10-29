@@ -1,17 +1,16 @@
-const { transporter } = require("./Email.config.js");
-const {
+import { transporter } from "./Email.config.js";
+import {
   Verification_Email_Template,
   Welcome_Email_Template,
-} = require("./EmailTemplate.js");
+} from "./EmailTemplate.js";
 
-const sendVerificationEamil = async (email, verificationCode, verificationLink) => {
+export const sendVerificationEmail = async (email, verificationCode, verificationLink) => {
   try {
-    const htmlContent = Verification_Email_Template.replace(
-      "{verificationCode}",
-      verificationCode
-    ).replace("{verificationLink}", verificationLink);
+    const htmlContent = Verification_Email_Template
+      .replace("{verificationCode}", verificationCode)
+      .replace("{verificationLink}", verificationLink);
 
-    const response = await transporter.sendMail({
+    await transporter.sendMail({
       from: '"FYP-Autimate" <autimate2245@gmail.com>',
       to: email,
       subject: "Verify your Email",
@@ -19,13 +18,13 @@ const sendVerificationEamil = async (email, verificationCode, verificationLink) 
       html: htmlContent,
     });
   } catch (error) {
-    console.log("Email error", error);
+    console.error("Email error:", error);
   }
 };
 
-const senWelcomeEmail = async (email, name) => {
+export const sendWelcomeEmail = async (email, name) => {
   try {
-    const response = await transporter.sendMail({
+    await transporter.sendMail({
       from: '"FYP-Autimate" <autimate2245@gmail.com>',
       to: email,
       subject: "Welcome Email",
@@ -33,8 +32,6 @@ const senWelcomeEmail = async (email, name) => {
       html: Welcome_Email_Template.replace("{name}", name),
     });
   } catch (error) {
-    console.log("Email error", error);
+    console.error("Email error:", error);
   }
 };
-
-module.exports = { senWelcomeEmail, sendVerificationEamil };

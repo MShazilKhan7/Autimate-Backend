@@ -1,19 +1,19 @@
-const bcryptjs = require("bcryptjs");
-const { sendVerificationEamil, senWelcomeEmail } = require("../Email/Email.js");
-const Usermodel = require("../models/User.js");
-const {
+import bcryptjs from "bcryptjs";
+import { sendVerificationEmail, sendWelcomeEmail } from "../Email/Email.js";
+import Usermodel from "../models/User.js";
+import {
   generateAccessToken,
   generateRefreshToken,
-} = require("../lib/generateTokens.js");
-const cookieOptions = require("../lib/cookieOption.js");
-const jwt = require("jsonwebtoken");
-const asyncHandler = require("express-async-handler");
-const { generateSessionId } = require("../lib/idGenerator.js");
+} from "../lib/generateTokens.js";
+import cookieOptions from "../lib/cookieOption.js";
+import jwt from "jsonwebtoken";
+import asyncHandler from "express-async-handler";
+import { generateSessionId } from "../lib/idGenerator.js";
 
 //@DESC Register
 //@Route POST /auth/register
 //@Access Private
-const Reigster = asyncHandler(async (req, res) => {
+export const Reigster = asyncHandler(async (req, res) => {
   try {
     const { email, password, firstName, lastName } = req.body;
 
@@ -51,16 +51,15 @@ const Reigster = asyncHandler(async (req, res) => {
 
     const clientUrl = `${process.env.CLIENT_URL}/otp-verify/${clientToken}`;
 
-    await sendVerificationEamil(user.email, verficationToken, clientUrl);
+    await sendVerificationEmail(user.email, verficationToken, clientUrl);
 
     return res.status(200).json({
-      success: true,
-      message: "User Register Successfully",
       user: {
         id: user._id,
         fullName: name,
         email: user.email,
         clientToken: user?.clientToken,
+        isVerified: user?.isVerified,
       },
     });
   } catch (error) {
@@ -74,27 +73,17 @@ const Reigster = asyncHandler(async (req, res) => {
 //@DESC Verify Email
 //@Route POST /auth/verify
 //@Access Private
-const VerifyEmail = asyncHandler(async (req, res) => {
+export const VerifyEmail = asyncHandler(async (req, res) => {
   try {
     const { code } = req.body;
     console.log("Received verification code:", code);
 
     const user = await Usermodel.findOne({ verficationToken: code });
-
+    
     if (!user) {
       return res.status(400).json({
         success: false,
         message: "Invalid verification code",
-      });
-    }
-
-    if (
-      !user.verficationTokenExpiresAt ||
-      user.verficationTokenExpiresAt.getTime() < Date.now()
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "OTP expired. Please request a new one.",
       });
     }
 
@@ -109,18 +98,18 @@ const VerifyEmail = asyncHandler(async (req, res) => {
     const name = `${user.firstName} ${user.lastName}`;
     await user.save();
 
-    senWelcomeEmail(user.email, name).catch((err) =>
+    sendWelcomeEmail(user.email, name).catch((err) =>
       console.log("Failed to send welcome email:", err.message)
     );
 
     return res.status(200).json({
-      success: true,
-      message: "User verified successfully",
+      accessToken,
+      refreshToken,
       user: {
         id: user._id,
         fullName: name,
         email: user.email,
-        accessToken,
+        isVerified: user.isVerified,
       },
     });
   } catch (error) {
@@ -132,7 +121,7 @@ const VerifyEmail = asyncHandler(async (req, res) => {
 //@DESC Resend Verification Code
 //@Route POST /auth/resend-verification
 //@Access Private
-const ResendVerification = asyncHandler(async (req, res) => {
+export const ResendVerification = asyncHandler(async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -162,7 +151,7 @@ const ResendVerification = asyncHandler(async (req, res) => {
     await user.save();
 
     const name = `${user.firstName} ${user.lastName}`;
-    await sendVerificationEamil(user.email, verficationToken);
+    await sendVerificationEmail(user.email, verficationToken);
 
     return res.status(200).json({
       success: true,
@@ -179,7 +168,7 @@ const ResendVerification = asyncHandler(async (req, res) => {
 //@DESC Login
 //@Route POST /auth/login
 //@Access Private
-const Login = asyncHandler(async (req, res) => {
+export const Login = asyncHandler(async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -203,11 +192,11 @@ const Login = asyncHandler(async (req, res) => {
         .json({ success: false, message: "Invalid credentials" });
     }
 
-    if (!user.isVerified) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Please verify your email first" });
-    }
+    // if (!user.isVerified) {
+    //   return res
+    //     .status(401)
+    //     .json({ success: false, message: "Please verify your email first" });
+    // }
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
@@ -220,13 +209,13 @@ const Login = asyncHandler(async (req, res) => {
       .cookie("refreshToken", refreshToken, cookieOptions)
       .status(200)
       .json({
-        success: true,
-        message: "Login successful",
+        accessToken,
+        refreshToken,
         user: {
           id: user._id,
           fullName: name,
           email: user.email,
-          accessToken,
+          isVerified: user.isVerified,
         },
       });
   } catch (error) {
@@ -240,7 +229,7 @@ const Login = asyncHandler(async (req, res) => {
 //@DESC Refresh Token
 //@Route POST /auth/refresh/token
 //@Access Private
-const RefreshToken = asyncHandler(async (req, res) => {
+export const RefreshToken = asyncHandler(async (req, res) => {
   try {
     const refreshToken = req.cookies?.refreshToken;
 
@@ -250,7 +239,6 @@ const RefreshToken = asyncHandler(async (req, res) => {
         .json({ success: false, message: "No refresh token provided" });
     }
 
-    // Find user by refresh token
     const user = await Usermodel.findOne({ refreshToken });
     if (!user) {
       return res
@@ -258,7 +246,6 @@ const RefreshToken = asyncHandler(async (req, res) => {
         .json({ success: false, message: "Invalid refresh token" });
     }
 
-    // Verify refresh token
     jwt.verify(
       refreshToken,
       process.env.JWT_REFRESH_SECRET,
@@ -302,7 +289,7 @@ const RefreshToken = asyncHandler(async (req, res) => {
 //@DESC Verify Client Token
 //@Route GET /auth/verify-client/:clientToken
 //@Access Public
-const VerifyClientToken = asyncHandler(async (req, res) => {
+export const VerifyClientToken = asyncHandler(async (req, res) => {
   try {
     const { clientToken } = req.params;
 
@@ -349,11 +336,49 @@ const VerifyClientToken = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = {
-  Reigster,
-  VerifyEmail,
-  Login,
-  RefreshToken,
-  ResendVerification,
-  VerifyClientToken,
-};
+export const getActiveUser = asyncHandler(async (req, res) => {
+  const userId = req.userId
+  console.log(userId)
+  try {
+    const user = await Usermodel.findById(userId).select("_id email firstName lastName isVerified createdAt");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+  }
+  catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+})
+
+export const SignOut = asyncHandler(async (req, res) => {
+  try {
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Successfully signed out",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+})
