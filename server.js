@@ -6,6 +6,7 @@ import { connectDB } from "./db/config.js";
 
 import AuthRoute from "./routes/Auth.Route.js"
 import UsersRoute from "./routes/Users.Route.js";
+import questionRoutes from './routes/Question.Routes.js';
 
 dotenv.config();
 connectDB();
@@ -26,12 +27,12 @@ app.use(cors({
 app.get("/", (req, res) => {
   res.send("Hello, Autimate API is working!");
 });
-import version from './version.json' assert { type: "json" };
 app.get("/api/version", (req, res) => {
   res.json(version);
 });
 app.use("/api/auth", AuthRoute);
 app.use("/api/users", UsersRoute);
+app.use('/api/questions', questionRoutes)
 
 const port = process.env.PORT || 5000;
 

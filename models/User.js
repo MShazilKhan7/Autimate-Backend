@@ -31,6 +31,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    speechLevel: {
+      type: String,
+      enum: ["beginner", "intermediate", "advanced"],
+      default: "beginner",
+    },
     verificationToken: String,
     verificationTokenExpiresAt: Date,
     clientToken: String,
