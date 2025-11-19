@@ -6,7 +6,7 @@ import { connectDB } from "./db/config.js";
 
 import AuthRoute from "./routes/Auth.Route.js"
 import UsersRoute from "./routes/Users.Route.js";
-import questionRoutes from './routes/Question.Routes.js';
+import questionRoutes from './routes/Onboarding.Routes.js';
 
 dotenv.config();
 connectDB();
@@ -32,7 +32,7 @@ app.get("/api/version", (req, res) => {
 });
 app.use("/api/auth", AuthRoute);
 app.use("/api/users", UsersRoute);
-app.use('/api/questions', questionRoutes)
+app.use('/api/on-boarding', questionRoutes)
 
 const port = process.env.PORT || 5000;
 

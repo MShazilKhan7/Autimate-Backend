@@ -15,4 +15,29 @@ const answerSchema = new mongoose.Schema({
 
 export const Answer = mongoose.model("Answer", answerSchema);
 
+const onBoardingResponseSchema = new mongoose.Schema({
+  userId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "User", 
+    required: true 
+  },
+  answers: [
+    {
+      questionId: { type: mongoose.Schema.Types.ObjectId, ref: "Question", required: true },
+      answerId: { type: mongoose.Schema.Types.ObjectId, ref: "Answer", required: true }
+    }
+  ],
+
+  completed: {
+    type: Boolean,
+    default: true
+  },
+
+  completedAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+export const onBoardingRespons = mongoose.model("onBoardingResponse", onBoardingResponseSchema);
 
