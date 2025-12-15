@@ -112,7 +112,9 @@ export const VerifyEmail = asyncHandler(async (req, res) => {
         fullName: name,
         email: user.email,
         isVerified: user.isVerified,
+        isOnboardingFinish:user.isOnboardingFinish
       },
+
     });
   } catch (error) {
     console.log("VerifyEmail error:", error);
@@ -343,7 +345,7 @@ export const getActiveUser = asyncHandler(async (req, res) => {
   const userId = req.userId
   console.log(userId)
   try {
-    const user = await Usermodel.findById(userId).select("_id email firstName lastName isVerified createdAt");
+    const user = await Usermodel.findById(userId).select("_id email firstName lastName isVerified createdAt isOnboardingFinish");
     if (!user) {
       return res.status(404).json({
         success: false,

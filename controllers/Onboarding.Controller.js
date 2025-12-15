@@ -110,7 +110,7 @@ export const saveQuizResponse = asyncHandler(async (req, res) => {
     console.log("answers:", answerArray);
     console.log("user id:", userId);
 
-    const user = await UsermodeL .findOne({ _id: userId });
+    const user = await Usermodel.findOne({ _id: userId });
 
     if (!userId || !answerArray.length) {
       return res.status(400).json({
