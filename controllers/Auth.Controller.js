@@ -41,7 +41,7 @@ export const Reigster = asyncHandler(async (req, res) => {
       password: hasePassowrd,
       firstName,
       lastName,
-      verficationToken,
+      verificationToken:verficationToken,
       clientToken,
       verficationTokenExpiresAt: Date.now() + 60 * 1000,
       clientTokenExpiresAt: Date.now() + 60 * 1000 * 5,
@@ -60,6 +60,7 @@ export const Reigster = asyncHandler(async (req, res) => {
         email: user.email,
         clientToken: user?.clientToken,
         isVerified: user?.isVerified,
+        isOnboardingFinish:false
       },
     });
   } catch (error) {
@@ -75,11 +76,12 @@ export const Reigster = asyncHandler(async (req, res) => {
 //@Access Private
 export const VerifyEmail = asyncHandler(async (req, res) => {
   try {
-    const { code } = req.body;
-    console.log("Received verification code:", code);
+    const { otp } = req.body;
+    console.log("Received verification code:", otp);
 
-    const user = await Usermodel.findOne({ verficationToken: code });
-    
+    const otpString = String(otp); 
+    const user = await Usermodel.findOne({ verificationToken: otpString });
+    console.log(user)
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -91,8 +93,8 @@ export const VerifyEmail = asyncHandler(async (req, res) => {
     const refreshToken = generateRefreshToken(user);
 
     user.isVerified = true;
-    user.verficationToken = "";
-    user.verficationTokenExpiresAt = undefined;
+    user.verificationToken = "";
+    user.verificationTokenExpiresAt = undefined;
     user.refreshToken = refreshToken;
 
     const name = `${user.firstName} ${user.lastName}`;
@@ -216,6 +218,7 @@ export const Login = asyncHandler(async (req, res) => {
           fullName: name,
           email: user.email,
           isVerified: user.isVerified,
+          isOnboardingFinish:user.isOnboardingFinish
         },
       });
   } catch (error) {

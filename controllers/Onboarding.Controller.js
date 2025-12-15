@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
-import { Answer, onBoardingRespons, Question,  } from "../models/Quiz.js";
+import { Answer, onBoardingRespons, Question } from "../models/Quiz.js";
+import Usermodel from "../models/User.js";
 import fs from "fs";
 import path from "path";
 
@@ -104,10 +105,12 @@ export const saveQuizResponse = asyncHandler(async (req, res) => {
       ? req.body.answers
       : req.body.answers?.answers || [];
 
-    const userId = req.userId || req.body.userId; 
+    const userId = req.userId || req.body.userId;
 
     console.log("answers:", answerArray);
     console.log("user id:", userId);
+
+    const user = await UsermodeL .findOne({ _id: userId });
 
     if (!userId || !answerArray.length) {
       return res.status(400).json({
@@ -116,6 +119,12 @@ export const saveQuizResponse = asyncHandler(async (req, res) => {
       });
     }
 
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "user not found",
+      });
+    }
     // Validate each answer
     for (const entry of answerArray) {
       if (!entry.questionId || !entry.answerId) {
@@ -151,6 +160,16 @@ export const saveQuizResponse = asyncHandler(async (req, res) => {
 
     await surveyResponse.save();
 
+    const updatedUser = await Usermodel.findByIdAndUpdate(
+      { _id: userId },
+      {
+        $set: {
+          isOnboardingFinish : true
+        },
+      },
+      { new: true } 
+    );
+
     res.status(200).json({
       success: true,
       data: surveyResponse,
@@ -165,7 +184,6 @@ export const saveQuizResponse = asyncHandler(async (req, res) => {
     });
   }
 });
-
 
 // @DESC Get user quiz responses in readable format
 // @Route GET /api/on-boarding/response/:userId

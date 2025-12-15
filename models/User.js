@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema(
       enum: ["beginner", "intermediate", "advanced"],
       default: "beginner",
     },
+    isOnboardingFinish: {
+      type: Boolean,
+      default: false,
+    },
     verificationToken: String,
     verificationTokenExpiresAt: Date,
     clientToken: String,
