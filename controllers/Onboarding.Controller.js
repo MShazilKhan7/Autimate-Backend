@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import { Answer, onBoardingRespons, Question } from "../models/Quiz.js";
 import Usermodel from "../models/User.js";
+import ChildInfo from "../models/childInfo.js";
 import fs from "fs";
 import path from "path";
 
@@ -185,6 +186,63 @@ export const saveQuizResponse = asyncHandler(async (req, res) => {
   }
 });
 
+// @DESC Save user onboarding information
+// @Route POST /api/on-boarding/submit
+// @Access Protected
+export const saveOnboarding = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.userId || req.body.userId;
+    const { name, age, gender, profile } = req.body;
+
+    // Validate required fields
+    if (!name || !age) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required child information (name, age, gender).",
+      });
+    }
+
+    const user = await Usermodel.findOne({ _id: userId });
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "user not found",
+      });
+    }
+
+    if (user.isOnboardingFinish) {
+      return res.status(400).json({
+        success: false,
+        message: "Profile has already been onboarded",
+      });
+    }
+
+    // Create the childInfo document
+    const childInfoDoc = new ChildInfo({
+      userId: user._id,
+      name: name,
+      age: age,
+      gender: gender || 0,
+      profile: profile,
+    });
+
+    await user.updateOne({ $set: { isOnboardingFinish: true } });
+    await childInfoDoc.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Profile onboarded successfully.",
+      data: childInfoDoc,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Error saving child information",
+      error: error.message,
+    });
+  }
+});
 // @DESC Get user quiz responses in readable format
 // @Route GET /api/on-boarding/response/:userId
 // @Access Protected or Public (as needed)
