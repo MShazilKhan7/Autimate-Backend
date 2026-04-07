@@ -8,4 +8,4 @@ router.get("/", verifyToken, getUsers);
 router.get("/:id", verifyToken, getUser);
 router.delete("/:id", verifyToken, deleteUser);
 
-export default router;
+export default router;  

@@ -9,7 +9,7 @@ import cookieOptions from "../lib/cookieOption.js";
 import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 import { generateSessionId } from "../lib/idGenerator.js";
-
+import childInfo from "../models/childInfo.js";
 //@DESC Register
 //@Route POST /auth/register
 //@Access Private
@@ -343,28 +343,28 @@ export const VerifyClientToken = asyncHandler(async (req, res) => {
 
 export const getActiveUser = asyncHandler(async (req, res) => {
   const userId = req.userId
-  console.log(userId)
-  try {
-    const user = await Usermodel.findById(userId).select("_id email firstName lastName isVerified createdAt isOnboardingFinish");
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-    return res.status(200).json({
-      success: true,
-      user,
-    });
-  }
-  catch (error) {
-    console.error(error);
-    return res.status(500).json({
+
+  const user = await Usermodel.findById(userId).select(
+    "_id email firstName lastName isVerified createdAt",
+  );
+
+  if (!user) {
+    return res.status(404).json({
       success: false,
-      message: "Internal server error",
+      message: "User not found",
     });
   }
-})
+
+  const ChildInfo = await childInfo.findOne({ userId: userId });
+
+  res.status(200).json({
+    success: true,
+    data: {
+      user,
+      ChildInfo, // will be null if not found (this is fine)
+    },
+  });
+});
 
 export const SignOut = asyncHandler(async (req, res) => {
   try {

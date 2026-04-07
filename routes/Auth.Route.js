@@ -14,7 +14,7 @@ import { apiKeyAuth } from "../middleware/apiKeyAuth.middlware.js";
 
 const router = express.Router();
 
-router.post("/register", Reigster);
+router.post("/register", Reigster)
 router.post("/verify", VerifyEmail);
 router.get("/me", verifyToken, getActiveUser);
 router.post("/verify-client/:clientToken", apiKeyAuth, VerifyClientToken);

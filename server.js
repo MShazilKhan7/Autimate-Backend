@@ -7,6 +7,8 @@ import { connectDB } from "./db/config.js";
 import AuthRoute from "./routes/Auth.Route.js"
 import UsersRoute from "./routes/Users.Route.js";
 import questionRoutes from './routes/Onboarding.Routes.js';
+import speechAceRoutes from './routes/SpeechAce.Routes.js';
+
 
 dotenv.config();
 connectDB();
@@ -33,6 +35,7 @@ app.get("/api/version", (req, res) => {
 app.use("/api/auth", AuthRoute);
 app.use("/api/users", UsersRoute);
 app.use('/api/on-boarding', questionRoutes)
+app.use('/api/score-speech', speechAceRoutes)
 
 const port = process.env.PORT || 5000;
 
