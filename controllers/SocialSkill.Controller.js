@@ -1,6 +1,16 @@
 import SocialSkill from "../models/SocialSkill.js";
 import asyncHandler from "express-async-handler";
 
+// @desc    Get single social skill
+// @route   GET /api/social-skills/:id
+export const getSocialSkillById = asyncHandler(async (req, res) => {
+  const skill = await SocialSkill.findById(req.params.id);
+  if (!skill) {
+    return res.status(404).json({ success: false, message: "Skill not found" });
+  }
+  res.status(200).json({ success: true, data: skill });
+});
+
 // @desc    Get all social skills
 // @route   GET /api/social-skills
 export const getSocialSkills = asyncHandler(async (req, res) => {

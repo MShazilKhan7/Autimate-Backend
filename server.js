@@ -12,6 +12,8 @@ import exerciseRoutes from "./routes/exercise.Routes.js";
 import socialSkillRoutes from "./routes/SocialSkill.Route.js";
 import speechTherapyRoutes from "./routes/SpeechTherapy.Route.js";
 import speechSpaceRoutes from "./routes/SpeechSpace.Route.js";
+import statsRoutes from "./routes/Stats.Route.js";
+
 
 dotenv.config();
 connectDB();
@@ -52,6 +54,8 @@ app.use("/api/exercises", exerciseRoutes);
 app.use("/api/social-skills", socialSkillRoutes);
 app.use("/api/speech-therapy", speechTherapyRoutes);
 app.use("/api/speech-space", speechSpaceRoutes);
+app.use("/api/stats", statsRoutes);
+
 
 const port = process.env.PORT || 5000;
 
