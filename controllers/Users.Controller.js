@@ -40,6 +40,7 @@ export const getUser = asyncHandler(async (req, res) => {
   });
 });
 
+// Delete user
 export const deleteUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const user = await Usermodel.findByIdAndDelete(id);
@@ -47,4 +48,19 @@ export const deleteUser = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: "User not found" });
   }
   res.status(200).json({ success: true, message: "User deleted successfully" });
+});
+
+// Update user details
+export const updateUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const user = await Usermodel.findByIdAndUpdate(id, req.body, {
+    new: true,
+    runValidators: true,
+  }).select("-password");
+
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  res.status(200).json({ success: true, data: user });
 });
