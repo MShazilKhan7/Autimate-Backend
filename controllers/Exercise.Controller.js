@@ -1,4 +1,4 @@
-import exercisesData from "../data/exercises.json" assert { type: "json" };
+import exercisesData from "../data/exercise.json" with { type: "json" };
 
 // GET exercises by level
 export const getExercisesByLevel = (req, res) => {

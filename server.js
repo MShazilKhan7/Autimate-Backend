@@ -25,6 +25,7 @@ app.use(
     origin: [
       "http://localhost:3000",
       "http://localhost:8080",
+      "http://localhost:8081",
       "https://autimateapp.vercel.app",
     ],
     credentials: true,
@@ -39,7 +40,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/version", (req, res) => {
-  res.json(version);
+  res.json({ version: "1.0.0" });
 });
 
 app.use("/api/auth", AuthRoute);

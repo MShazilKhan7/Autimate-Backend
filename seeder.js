@@ -90,7 +90,7 @@ const speechSpaceLevels = [
 const importData = async () => {
   try {
     // Connect to DB
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(process.env.MONGOOSE_CONNECTION);
     console.log("Connected to MongoDB for seeding...");
 
     // Clear existing data

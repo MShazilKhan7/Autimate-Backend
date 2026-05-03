@@ -236,7 +236,7 @@ export const Login = asyncHandler(async (req, res) => {
 //@Access Private
 export const RefreshToken = asyncHandler(async (req, res) => {
   try {
-    const refreshToken = req.cookies?.refreshToken;
+    const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken || req.body?.refresh_token;
 
     if (!refreshToken) {
       return res
