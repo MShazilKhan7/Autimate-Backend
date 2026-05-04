@@ -294,3 +294,53 @@ export const getUserQuizResponse = asyncHandler(async (req, res) => {
     });
   }
 });
+
+// @DESC Get child information for current user
+// @Route GET /api/on-boarding/child-info
+// @Access Protected
+export const getChildInfo = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+
+  const child = await ChildInfo.findOne({ userId });
+
+  if (!child) {
+    return res.status(404).json({
+      success: false,
+      message: "Child information not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: child,
+  });
+});
+
+// @DESC Update child information
+// @Route PUT /api/on-boarding/child-info
+// @Access Protected
+export const updateChildInfo = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+  const { name, age } = req.body;
+
+  let child = await ChildInfo.findOne({ userId });
+
+  if (!child) {
+    return res.status(404).json({
+      success: false,
+      message: "Child information not found",
+    });
+  }
+
+  child.name = name || child.name;
+  child.age = age || child.age;
+
+  await child.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Child information updated successfully",
+    data: child,
+  });
+});
+
