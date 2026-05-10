@@ -46,7 +46,7 @@ import FormData from "form-data";
 import axios from "axios";
 import asyncHandler from "express-async-handler";
 
-import { createOrUpdateSession } from "../services/session.service.js";
+import { createOrUpdateSession } from "../services/Session.Service.js";
 
 export const scoreSpeech = asyncHandler(async (req, res) => {
   try {
