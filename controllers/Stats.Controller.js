@@ -1,6 +1,6 @@
 import Usermodel from "../models/User.js";
 import SocialSkill from "../models/SocialSkill.js";
-import SpeechTherapy from "../models/SpeechTherapy.js";
+import SpeechTherapy from "../models/SpeechTherapy.ts";
 import SpeechSpace from "../models/SpeechSpace.js";
 import asyncHandler from "express-async-handler";
 

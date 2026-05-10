@@ -1,20 +1,39 @@
 import express from "express";
 import { verifyToken, isAdmin } from "../middleware/auth.middleware.js";
 import {
-  getSpeechTherapyWords,
-  createSpeechTherapyWord,
-  updateSpeechTherapyWord,
-  deleteSpeechTherapyWord
-} from "../controllers/SpeechTherapy.Controller.js";
+  getModules,
+  getModule,
+  createModule,
+  updateModule,
+  deleteModule,
+  getWords,
+  getWord,
+  createWord,
+  updateWord,
+  deleteWord
+} from "../controllers/SpeechTherapy.Controller.ts";
+import { validateObectId } from "../middleware/validateObjectId.js";
 
 const router = express.Router();
 
-router.route("/")
-  .get(verifyToken, getSpeechTherapyWords)
-  .post(verifyToken, isAdmin, createSpeechTherapyWord);
+router.route("/modules")
+  .get(verifyToken, getModules)
+  .post(verifyToken, isAdmin, createModule);
 
-router.route("/:id")
-  .put(verifyToken, isAdmin, updateSpeechTherapyWord)
-  .delete(verifyToken, isAdmin, deleteSpeechTherapyWord);
+router.route("/modules/:id")
+  .get(verifyToken, validateObectId, getModule)
+  .put(verifyToken, isAdmin, validateObectId, updateModule)
+  .delete(verifyToken, isAdmin, deleteModule);
+
+
+// Words
+router.route("/words")
+  .get(verifyToken, getWords)
+  .post(verifyToken, createWord)
+
+router.route('/words/:id')
+  .get(verifyToken, validateObectId, getWord)
+  .put(verifyToken, isAdmin, validateObectId, updateWord)
+  .delete(verifyToken, isAdmin, validateObectId, deleteWord)
 
 export default router;
