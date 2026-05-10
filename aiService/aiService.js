@@ -2,7 +2,6 @@ import Groq from "groq-sdk";
 import dotenv from "dotenv";
 dotenv.config();
 
-
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
@@ -10,22 +9,26 @@ const groq = new Groq({
 /**
  * Builds a child-friendly prompt from the pronunciation score report
  */
-const buildFeedbackPrompt = (scoreReport) => {
-  const { word, phonemes, mockResponse } = scoreReport;
-  const textScore = mockResponse?.text_score;
-  const wordScore = textScore?.word_score_list?.[0];
-  const phoneScores = wordScore?.phone_score_list || [];
-  const overallScore = textScore?.quality_score ?? 0;
-  const passed = wordScore?.quality_class === "pass";
+// aiService/aiService.js
 
-  // Identify struggling phonemes (score < 85)
+const buildFeedbackPrompt = (scoreReport) => {
+  const { word, attempts } = scoreReport;
+
+  // Latest attempt
+  const latestAttempt = attempts[attempts.length - 1];
+  const phoneScores = latestAttempt?.phone_score_list || [];
+  const overallScore = latestAttempt?.quality_score ?? 0;
+  const passed = latestAttempt?.quality_class === "pass";
+
+  // Identify struggling phonemes
   const weakPhonemes = phoneScores.filter((p) => p.quality_score < 85);
   const strongPhonemes = phoneScores.filter((p) => p.quality_score >= 85);
 
+  // Latest attempt phoneme breakdown
   const phonemeDetails = phoneScores
     .map(
       (p) =>
-        `  - Phoneme "/${p.phone}/": score ${p.quality_score}/100, heard as "/${p.sound_most_like}/"`
+        `  - Phoneme "/${p.phone}/": score ${p.quality_score}/100, heard as "/${p.sound_most_like}/"`,
     )
     .join("\n");
 
@@ -33,17 +36,46 @@ const buildFeedbackPrompt = (scoreReport) => {
     .map((p) => `"/${p.phone}/" (scored ${p.quality_score}/100)`)
     .join(", ");
 
+  // COMPLETE ATTEMPT HISTORY
+  const recentAttemptsText = attempts
+    .map((attempt, index) => {
+      const phoneBreakdown = attempt.phone_score_list
+        .map(
+          (p) =>
+            `     - /${p.phone}/ → ${p.quality_score}/100, heard as /${p.sound_most_like}/`,
+        )
+        .join("\n");
+
+      return `
+Attempt ${index + 1}:
+Overall Score: ${attempt.quality_score}/100
+Result: ${attempt.quality_class}
+
+Phone Breakdown:
+${phoneBreakdown}
+`;
+    })
+    .join("\n");
+
   const prompt = `
 You are a warm, encouraging speech therapy assistant helping a young child (ages 4–10) with Autism Spectrum Disorder learn to pronounce words correctly.
 
 The child just attempted to say the word: "${word}"
+
+Recent attempts:
+${recentAttemptsText}
+
 Overall pronunciation score: ${overallScore}/100
 Result: ${passed ? "PASSED ✓" : "NEEDS MORE PRACTICE"}
 
 Phoneme-by-phoneme breakdown:
 ${phonemeDetails}
 
-${weakPhonemes.length > 0 ? `Phonemes needing improvement: ${weakDetails}` : "All phonemes were pronounced well!"}
+${
+  weakPhonemes.length > 0
+    ? `Phonemes needing improvement: ${weakDetails}`
+    : "All phonemes were pronounced well!"
+}
 
 Your task:
 1. Start with warm, positive encouragement (1-2 sentences). Always find something to praise.
@@ -62,7 +94,6 @@ Rules:
 
   return prompt.trim();
 };
-
 /**
  * Generates child-friendly feedback using Llama-3.3-70b-versatile via Groq
  * @param {Object} scoreReport - The pronunciation score report
@@ -71,6 +102,7 @@ Rules:
 export const generateFeedback = async (scoreReport) => {
   const prompt = buildFeedbackPrompt(scoreReport);
 
+  console.log("PROMPT", prompt);
   const completion = await groq.chat.completions.create({
     model: "llama-3.3-70b-versatile",
     messages: [

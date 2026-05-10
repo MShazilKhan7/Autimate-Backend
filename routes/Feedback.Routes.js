@@ -1,6 +1,7 @@
 import express from "express";
 const router = express.Router();
 import { generateSpeechFeedback } from "../controllers/Feedback.Controller.js";
+import { verifyToken } from "../middleware/auth.middleware.js";
 
 // You can add your auth middleware here if needed
 // const { protect } = require("../middleware/authMiddleware");
@@ -11,6 +12,6 @@ import { generateSpeechFeedback } from "../controllers/Feedback.Controller.js";
  * @access  Private (add middleware as needed)
  * @body    { id, word, image, category, phonemes, mockResponse }
  */
-router.post("/generate", generateSpeechFeedback);
+router.post("/generate", verifyToken, generateSpeechFeedback);
 
 export default router;
