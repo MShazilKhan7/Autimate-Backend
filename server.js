@@ -8,6 +8,13 @@ import UsersRoute from "./routes/Users.Route.js";
 import questionRoutes from "./routes/Onboarding.Routes.js";
 import speechAceRoutes from "./routes/SpeechAce.Routes.js";
 import aiServiceRoutes from "./routes/Feedback.Routes.js";
+import exerciseRoutes from "./routes/exercise.Routes.js";
+import socialSkillRoutes from "./routes/SocialSkill.Route.js";
+import speechTherapyRoutes from "./routes/SpeechTherapy.Route.js";
+import speechSpaceRoutes from "./routes/SpeechSpace.Route.js";
+import statsRoutes from "./routes/Stats.Route.js";
+import sessionRoutes from "./routes/Session.Routes.js"
+
 
 dotenv.config();
 connectDB();
@@ -21,6 +28,7 @@ app.use(
     origin: [
       "http://localhost:3000",
       "http://localhost:8080",
+      "http://localhost:8081",
       "https://autimateapp.vercel.app",
     ],
     credentials: true,
@@ -35,7 +43,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/version", (req, res) => {
-  res.json(version);
+  res.json({ version: "1.0.0" });
 });
 
 app.use("/api/auth", AuthRoute);
@@ -43,6 +51,14 @@ app.use("/api/users", UsersRoute);
 app.use("/api/on-boarding", questionRoutes);
 app.use("/api/score-speech", speechAceRoutes);
 app.use("/api/ai", aiServiceRoutes);
+app.use("/api/exercises", exerciseRoutes);
+app.use("/api/social-skills", socialSkillRoutes);
+app.use("/api/speech-therapy", speechTherapyRoutes);
+app.use("/api/speech-space", speechSpaceRoutes);
+app.use("/api/stats", statsRoutes);
+app.use("/api/sessions", sessionRoutes);
+
+
 
 const port = process.env.PORT || 5000;
 

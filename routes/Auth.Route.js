@@ -20,7 +20,7 @@ router.get("/me", verifyToken, getActiveUser);
 router.post("/verify-client/:clientToken", apiKeyAuth, VerifyClientToken);
 router.post("/resend-verify", ResendVerification);
 router.post("/login", Login);
-router.post("/refresh/token", apiKeyAuth, RefreshToken);
+router.post("/refresh/token", RefreshToken);
 router.post("/signout", verifyToken, SignOut);
 
 export default router;
