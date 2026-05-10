@@ -2,7 +2,7 @@
 
 import { generateFeedback } from "../aiService/aiService.js";
 
-import { getSessionByUserAndWord } from "../services/session.service.js";
+import { getSessionByUserAndWord } from "../services/Session.Service.js";
 
 export const generateSpeechFeedback = async (req, res) => {
   try {
