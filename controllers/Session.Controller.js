@@ -1,6 +1,5 @@
 // controllers/Session.Controller.js
 
-import router from "../routes/Session.Routes";
 import Session from "../models/Session";
 
 
