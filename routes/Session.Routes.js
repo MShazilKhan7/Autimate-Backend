@@ -12,7 +12,7 @@ import {
   updateAttemptFeedback,
   deleteSession,
   deleteAttempt,
-} from "../controllers/Session.Controller";
+} from "../controllers/Session.Controller.js";
 
 // CREATE SESSION / ADD ATTEMPT
 router.post("/", createOrUpdateSession);
