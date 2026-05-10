@@ -1,6 +1,6 @@
 // controllers/Session.Controller.js
 
-import Session from "../models/Session";
+import Session from "../models/Session.js";
 
 
 // CREATE or ADD ATTEMPT
