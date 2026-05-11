@@ -11,7 +11,7 @@ import {
   createWord,
   updateWord,
   deleteWord
-} from "../controllers/SpeechTherapy.Controller.ts";
+} from "../controllers/SpeechTherapy.Controller.js";
 import { validateObectId } from "../middleware/validateObjectId.js";
 
 const router = express.Router();

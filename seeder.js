@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import bcryptjs from "bcryptjs";
 import User from "./models/User.js";
 import SocialSkill from "./models/SocialSkill.js";
-import SpeechTherapy from "./models/SpeechTherapy.ts";
+import SpeechTherapy from "./models/SpeechTherapy.js";
 import SpeechSpace from "./models/SpeechSpace.js";
 
 dotenv.config();
