@@ -1,5 +1,5 @@
-import ExerciseModule from "../models/SpeechTherapy.ts";
-import { WordModel } from "../models/SpeechTherapy.ts";
+import ExerciseModule from "../models/SpeechTherapy.js";
+import { WordModel } from "../models/SpeechTherapy.js";
 import type { Request, Response } from "express";
 
 // GET ALL EXERCISES
