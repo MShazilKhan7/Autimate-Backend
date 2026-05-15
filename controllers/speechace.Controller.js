@@ -52,6 +52,8 @@ export const scoreSpeech = asyncHandler(async (req, res) => {
   try {
     const { wordId, word } = req.body;
 
+    console.log("word identified", word)
+
     const audioFile = req.file;
     const userId = req.userId
 

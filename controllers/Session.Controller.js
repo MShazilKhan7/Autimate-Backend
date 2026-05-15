@@ -71,6 +71,29 @@ export const getAllSessions = async (req, res) => {
   }
 };
 
+// Get all sessions by the userId
+export const getAllSessionsByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const sessions = await Session.find({ userId })
+      .populate("userId")
+      .populate("wordId")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: sessions.length,
+      data: sessions,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // GET SINGLE SESSION
 export const getSingleSession = async (req, res) => {
   try {

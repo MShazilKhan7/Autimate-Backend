@@ -11,6 +11,7 @@ import {
   getSessionByUserAndWord,
   updateAttemptFeedback,
   deleteSession,
+  getAllSessionsByUserId,
   deleteAttempt,
 } from "../controllers/Session.Controller.js";
 
@@ -40,5 +41,8 @@ router.delete(
 
 // DELETE SESSION
 router.delete("/:id", deleteSession);
+
+// get all sessions by userId
+router.get("/user/:userId", getAllSessionsByUserId);
 
 export default router;
