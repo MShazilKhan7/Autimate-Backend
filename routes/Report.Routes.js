@@ -4,7 +4,7 @@ import {
   generateSessionReport,
   getSessionReport,
   getUserReports,
-} from "../controllers/report.controller.js";
+} from "../controllers/Report.Controller.js";
 // import { protect } from "../middleware/auth.middleware.js"; // uncomment if you have auth middleware
 
 const router = express.Router();
