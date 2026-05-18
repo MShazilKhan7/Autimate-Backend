@@ -1,5 +1,5 @@
+// models/session.model.js  — your existing file + hasReport field added (marked with ★)
 import mongoose from "mongoose";
-
 
 const AttemptSchema = new mongoose.Schema(
   {
@@ -68,6 +68,11 @@ const SessionSchema = new mongoose.Schema(
     },
 
     attempts: [AttemptSchema],
+
+    hasReport: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

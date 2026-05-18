@@ -14,6 +14,7 @@ import speechTherapyRoutes from "./routes/SpeechTherapy.Route.js";
 import speechSpaceRoutes from "./routes/SpeechSpace.Route.js";
 import statsRoutes from "./routes/Stats.Route.js";
 import sessionRoutes from "./routes/Session.Routes.js"
+import reportRoutes from "./routes/Report.Routes.js"
 
 
 dotenv.config();
@@ -57,6 +58,8 @@ app.use("/api/speech-therapy", speechTherapyRoutes);
 app.use("/api/speech-space", speechSpaceRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/sessions", sessionRoutes);
+app.use("/api/reports", reportRoutes);
+
 
 
 
