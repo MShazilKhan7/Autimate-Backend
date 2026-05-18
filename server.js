@@ -30,6 +30,7 @@ app.use(
       "http://localhost:8080",
       "http://localhost:8081",
       "https://autimateapp.vercel.app",
+      "https://autimateadmin.vercel.app"
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
