@@ -1,5 +1,6 @@
 import Usermodel from "../models/User.js";
 import ChildInfo from "../models/childInfo.js";
+import Report from "../models/Report.js";
 import asyncHandler from "express-async-handler";
 import bcryptjs from "bcryptjs";
 
@@ -168,5 +169,70 @@ export const assignCaregiver = asyncHandler(async (req, res) => {
     success: true,
     message: "Caregiver assigned successfully",
     data: user
+  });
+});
+
+// Get children assigned to the logged-in caregiver
+export const getCaregiverChildren = asyncHandler(async (req, res) => {
+  const caregiverId = req.userId;
+
+  // Verify requester is a caregiver
+  const caregiver = await Usermodel.findById(caregiverId);
+  if (!caregiver || caregiver.role !== "caregiver") {
+    return res.status(403).json({ success: false, message: "Access denied. Caregiver role required." });
+  }
+
+  // Find all parents assigned to this caregiver
+  const parents = await Usermodel.find({ caregiverId, role: "user" }).select(
+    "_id email firstName lastName"
+  );
+
+  const childrenList = [];
+  for (const parent of parents) {
+    const childDoc = await ChildInfo.findOne({ userId: parent._id });
+    if (childDoc) {
+      childrenList.push({
+        parent: {
+          _id: parent._id,
+          firstName: parent.firstName,
+          lastName: parent.lastName,
+          email: parent.email
+        },
+        child: childDoc
+      });
+    }
+  }
+
+  res.status(200).json({
+    success: true,
+    count: childrenList.length,
+    data: childrenList
+  });
+});
+
+// Get reports for a specific parent user (child) assigned to caregiver
+export const getCaregiverReports = asyncHandler(async (req, res) => {
+  const caregiverId = req.userId;
+  const { userId } = req.params;
+
+  // Verify requester is a caregiver
+  const caregiver = await Usermodel.findById(caregiverId);
+  if (!caregiver || caregiver.role !== "caregiver") {
+    return res.status(403).json({ success: false, message: "Access denied. Caregiver role required." });
+  }
+
+  // Verify that the parent user is indeed assigned to this caregiver
+  const parent = await Usermodel.findOne({ _id: userId, caregiverId });
+  if (!parent) {
+    return res.status(403).json({ success: false, message: "Access denied. User not assigned to this caregiver." });
+  }
+
+  // Fetch all reports for the parent
+  const reports = await Report.find({ userId }).sort({ generatedAt: -1 });
+
+  res.status(200).json({
+    success: true,
+    count: reports.length,
+    data: reports
   });
 });

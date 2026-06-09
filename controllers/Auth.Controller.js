@@ -345,7 +345,7 @@ export const getActiveUser = asyncHandler(async (req, res) => {
   const userId = req.userId
 
   const user = await Usermodel.findById(userId).select(
-    "_id email firstName lastName isVerified createdAt",
+    "_id email firstName lastName role phone specialization experience isVerified createdAt",
   );
 
   if (!user) {

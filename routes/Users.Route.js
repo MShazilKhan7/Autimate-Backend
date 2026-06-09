@@ -8,7 +8,9 @@ import {
   getCaregivers,
   createCaregiver,
   getParentsWithChildren,
-  assignCaregiver
+  assignCaregiver,
+  getCaregiverChildren,
+  getCaregiverReports
 } from "../controllers/Users.Controller.js";
 
 const router = express.Router();
@@ -18,6 +20,8 @@ router.get("/caregivers", verifyToken, isAdmin, getCaregivers);
 router.post("/caregivers", verifyToken, isAdmin, createCaregiver);
 router.get("/parents-with-children", verifyToken, isAdmin, getParentsWithChildren);
 router.post("/assign-caregiver", verifyToken, isAdmin, assignCaregiver);
+router.get("/caregiver/children", verifyToken, getCaregiverChildren);
+router.get("/caregiver/reports/:userId", verifyToken, getCaregiverReports);
 
 router.get("/:id", verifyToken, getUser);
 router.put("/:id", verifyToken, isAdmin, updateUser);
