@@ -1,17 +1,22 @@
-import ExerciseModule from "../models/SpeechTherapy.js";
+import ModuleModel from "../models/SpeechTherapy.js";
 import { WordModel } from "../models/SpeechTherapy.js";
 import type { Request, Response } from "express";
 
 // GET ALL EXERCISES
 export const getModules = async (req: Request, res: Response) => {
   try {
-    const exercises = await ExerciseModule.find()
+    const modules = await ModuleModel.find()
       .populate("steps.wordId")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
+
+    modules.forEach((module) => {
+      module.steps.sort((a, b) => a.order - b.order);
+    });
 
     return res.status(200).json({
       success: true,
-      data: exercises,
+      data: modules,
     });
   } catch (error: any) {
     return res.status(500).json({
@@ -26,20 +31,25 @@ export const getModule = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const exercise = await ExerciseModule.findById(id).populate(
-      "steps.wordId"
-    );
+    const module = await ModuleModel.findById(id)
+    .populate("steps.wordId")
+    .populate("steps.config.distractorWordIds")
+    .lean();
 
-    if (!exercise) {
+    if (!module) {
       return res.status(404).json({
         success: false,
-        message: "Exercise not found",
+        message: "Module not found",
       });
+    }
+
+    if (module?.steps) {
+      module.steps.sort((a, b) => a.order - b.order);
     }
 
     return res.status(200).json({
       success: true,
-      data: exercise,
+      data: module,
     });
   } catch (error: any) {
     return res.status(500).json({
@@ -54,7 +64,7 @@ export const createModule = async (req: Request, res: Response) => {
   try {
     const { title, subtitle, emoji, color, colorLight, steps } = req.body;
 
-    const exercise = await ExerciseModule.create({
+    const module = await ModuleModel.create({
       title,
       subtitle,
       emoji,
@@ -65,8 +75,8 @@ export const createModule = async (req: Request, res: Response) => {
 
     return res.status(201).json({
       success: true,
-      message: "Exercise created successfully",
-      data: exercise,
+      message: "Module created successfully",
+      data: module,
     });
   } catch (error: any) {
     return res.status(500).json({
@@ -81,7 +91,7 @@ export const updateModule = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const updatedExercise = await ExerciseModule.findByIdAndUpdate(
+    const updatedModule = await ModuleModel.findByIdAndUpdate(
       id,
       req.body,
       {
@@ -90,17 +100,17 @@ export const updateModule = async (req: Request, res: Response) => {
       }
     ).populate("steps.wordId");
 
-    if (!updatedExercise) {
+    if (!updatedModule) {
       return res.status(404).json({
         success: false,
-        message: "Exercise not found",
+        message: "Module not found",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Exercise updated successfully",
-      data: updatedExercise,
+      message: "Module updated successfully",
+      data: updatedModule,
     });
   } catch (error: any) {
     return res.status(500).json({
@@ -115,18 +125,18 @@ export const deleteModule = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const deletedExercise = await ExerciseModule.findByIdAndDelete(id);
+    const deletedModule = await ModuleModel.findByIdAndDelete(id);
 
-    if (!deletedExercise) {
+    if (!deletedModule) {
       return res.status(404).json({
         success: false,
-        message: "Exercise not found",
+        message: "Module not found",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Exercise deleted successfully",
+      message: "Module deleted successfully",
     });
   } catch (error: any) {
     return res.status(500).json({
@@ -144,7 +154,7 @@ export const deleteModule = async (req: Request, res: Response) => {
 // ALL WORDS
 export const getWords = async (req: Request, res: Response) => {
   try {
-    const words = await WordModel.find().sort({ createdAt: -1 });
+    const words = await WordModel.find().sort({ createdAt: -1 }).lean();
 
     return res.status(200).json({
       success: true,
@@ -166,7 +176,7 @@ export const getWord = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const word = await WordModel.findById(id);
+    const word = await WordModel.findById(id).lean();
 
     if (!word) {
       return res.status(404).json({
@@ -196,23 +206,21 @@ export const createWord = async (req: Request, res: Response) => {
     const {
       word,
       emoji,
-      image,
-      audio,
+      phonemes,
+      images,
+      videos,
       category,
-      difficulty,
-      description,
-      color
+      color,
     } = req.body;
 
     const createdWord = await WordModel.create({
       word,
       emoji,
-      image,
-      audio,
+      phonemes,
+      images,
+      videos,
       category,
-      difficulty,
-      description,
-      color
+      color,
     });
 
     return res.status(201).json({
@@ -268,6 +276,17 @@ export const updateWord = async (req: Request, res: Response) => {
 export const deleteWord = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+
+    const usedInExercises = await ModuleModel.exists({
+      "steps.wordId": id,
+    });
+
+    if (usedInExercises) {
+      return res.status(400).json({
+        success: false,
+        message: "Word is being used in an exercise and cannot be deleted",
+      });
+    }
 
     const deletedWord = await WordModel.findByIdAndDelete(id);
 
