@@ -68,19 +68,53 @@ export const WordModel: Model<Word> =
    MODULE STEP
 ========================= */
 
+type ExerciseType =
+  | "imitation"
+  | "identify"
+  | "expressive"
+  | "functional"
+  | "checkpoint"; // checkpoint is a special type that marks the end of a phase and the beginning of the next one
+
+
+export interface ExerciseConfig {
+  prompt?: string;
+  video?: string;
+  image?: string;
+  distractorWordIds?: Types.ObjectId[];
+}
+
 export interface ModuleStep {
   _id?: Types.ObjectId;
-  type: "imitation" | "expressive" | "phoneme" | "checkpoint";
+  type: ExerciseType;
   wordId?: Types.ObjectId;
   title: string;
-  phase: string;
+  order: number;
+  difficulty?: "easy" | "medium" | "hard";
+  config?: ExerciseConfig;
 }
+
+const ExerciseConfigSchema = new Schema(
+  {
+    prompt: String,
+    video: String,
+    image: String,
+    distractorWordIds: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Word",
+      },
+    ],
+  },
+  {
+    _id: false,
+  }
+);
 
 const ModuleStepSchema = new Schema<ModuleStep>(
   {
     type: {
       type: String,
-      enum: ["imitation", "expressive", "phoneme", "checkpoint"],
+      enum: ["imitation", "identify", "expressive", "functional", "checkpoint"],
       required: true,
     },
 
@@ -95,10 +129,17 @@ const ModuleStepSchema = new Schema<ModuleStep>(
       required: true,
     },
 
-    phase: {
-      type: String,
+    order: {
+      type: Number,
       required: true,
+      default: 1,
     },
+    difficulty: {
+      type: String,
+      enum: ["easy", "medium", "hard"],
+      default: "easy",
+    },
+    config: ExerciseConfigSchema,
   },
   {
     _id: true, // auto generates _id for each step
@@ -108,6 +149,8 @@ const ModuleStepSchema = new Schema<ModuleStep>(
 /* =========================
    MODULE
 ========================= */
+
+
 
 export interface Module extends Document {
   title: string;
@@ -156,7 +199,11 @@ const ModuleSchema = new Schema<Module>(
   }
 );
 
-export const ModuleModel: Model<Module> =
-  mongoose.models.Module || mongoose.model<Module>("Module", ModuleSchema);
+export const ModuleModel =
+  mongoose.models.Module ||
+  mongoose.model("Module", ModuleSchema);
 
-export default mongoose.model("ExerciseModule", ModuleSchema);
+export default mongoose.model(
+  "ExerciseModule",
+  ModuleSchema
+);
