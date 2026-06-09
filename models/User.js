@@ -42,8 +42,25 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "admin", "caregiver"],
       default: "user",
+    },
+    caregiverId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    phone: {
+      type: String,
+      default: "",
+    },
+    specialization: {
+      type: String,
+      default: "",
+    },
+    experience: {
+      type: Number,
+      default: 0,
     },
     verificationToken: String,
     verificationTokenExpiresAt: Date,
