@@ -1,8 +1,9 @@
 // controllers/Feedback.Controller.js
 
 import { generateFeedback } from "../aiService/aiService.js";
-
 import { getSessionByUserAndWord } from "../services/Session.Service.js";
+import ChildInfo from "../models/childInfo.js";
+import User from "../models/User.js";
 
 export const generateSpeechFeedback = async (req, res) => {
   try {
@@ -16,6 +17,9 @@ export const generateSpeechFeedback = async (req, res) => {
         message: "wordId is required",
       });
     }
+
+    const user = await User.findById(userId).lean();
+    const child = await ChildInfo.findOne({ userId }).lean();
 
     // FETCH SESSION
     const session = await getSessionByUserAndWord({
@@ -31,7 +35,7 @@ export const generateSpeechFeedback = async (req, res) => {
     }
 
     // LAST 5 ATTEMPTS
-    const recentAttempts = session.attempts.slice(-5);
+    const recentAttempts = session.attempts.slice(-10);
 
     // FORMAT FOR LLM
     const formattedAttempts = recentAttempts.map((attempt) => ({
@@ -46,7 +50,15 @@ export const generateSpeechFeedback = async (req, res) => {
       createdAt: attempt.createdAt,
     }));
 
+    const childContext = child
+      ? {
+          name: child.name,
+          age: child.age,
+        }
+      : null;
+
     const scoreReport = {
+      childInfo: childContext,
       word: session.word,
       attempts: formattedAttempts,
     };

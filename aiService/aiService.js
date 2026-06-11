@@ -10,62 +10,73 @@ const groq = new Groq({
  * Builds a child-friendly prompt from the pronunciation score report
  */
 // aiService/aiService.js
-
 const buildFeedbackPrompt = (scoreReport) => {
-  const { word, attempts } = scoreReport;
+  const { word, attempts, childInfo } = scoreReport;
 
-  // Latest attempt
+  const childName = childInfo?.name || null;
+  const childAge = childInfo?.age || null;
+
+  // Current attempt
   const latestAttempt = attempts[attempts.length - 1];
+
+  // Previous attempts (excluding current)
+  const previousAttempts = attempts.slice(0, -1);
+
   const phoneScores = latestAttempt?.phone_score_list || [];
   const overallScore = latestAttempt?.quality_score ?? 0;
   const passed = latestAttempt?.quality_class === "pass";
 
-  // Identify struggling phonemes
-  const weakPhonemes = phoneScores.filter((p) => p.quality_score < 85);
-  const strongPhonemes = phoneScores.filter((p) => p.quality_score >= 85);
+  const weakPhonemes = phoneScores.filter((p) => p.quality_score < 70);
+  const strongPhonemes = phoneScores.filter((p) => p.quality_score >= 80);
 
-  // Latest attempt phoneme breakdown
   const phonemeDetails = phoneScores
     .map(
       (p) =>
-        `  - Phoneme "/${p.phone}/": score ${p.quality_score}/100, heard as "/${p.sound_most_like}/"`,
+        `  - Phoneme "/${p.phone}/": score ${round(p.quality_score)}/100, heard as "/${p.sound_most_like}/"`,
     )
     .join("\n");
 
   const weakDetails = weakPhonemes
-    .map((p) => `"/${p.phone}/" (scored ${p.quality_score}/100)`)
+    .map((p) => `"/${p.phone}/" (scored ${round(p.quality_score)}/100)`)
     .join(", ");
 
-  // COMPLETE ATTEMPT HISTORY
-  const recentAttemptsText = attempts
-    .map((attempt, index) => {
-      const phoneBreakdown = attempt.phone_score_list
-        .map(
-          (p) =>
-            `     - /${p.phone}/ → ${p.quality_score}/100, heard as /${p.sound_most_like}/`,
-        )
-        .join("\n");
+  const previousAttemptsText =
+    previousAttempts.length > 0
+      ? previousAttempts
+          .map((attempt, index) => {
+            const phoneBreakdown = attempt.phone_score_list
+              .map(
+                (p) =>
+                  `     - /${p.phone}/ → ${round(p.quality_score)}/100, heard as /${p.sound_most_like}/`,
+              )
+              .join("\n");
 
-      return `
-Attempt ${index + 1}:
-Overall Score: ${attempt.quality_score}/100
+            return `
+Previous Attempt ${index + 1}:
+Overall Score: ${round(attempt.quality_score)}/100
 Result: ${attempt.quality_class}
 
 Phone Breakdown:
 ${phoneBreakdown}
 `;
-    })
-    .join("\n");
+          })
+          .join("\n")
+      : "No previous attempts available.";
 
   const prompt = `
 You are a warm, encouraging speech therapy assistant helping a young child (ages 4–10) with Autism Spectrum Disorder learn to pronounce words correctly.
 
+Child Information:
+${childName ? `Name: ${childName}` : ""}
+${childAge ? `Age: ${childAge}` : ""}
+
 The child just attempted to say the word: "${word}"
 
-Recent attempts:
-${recentAttemptsText}
+Previous attempts:
+${previousAttemptsText}
 
-Overall pronunciation score: ${overallScore}/100
+Current attempt:
+Overall Score: ${overallScore}/100
 Result: ${passed ? "PASSED ✓" : "NEEDS MORE PRACTICE"}
 
 Phoneme-by-phoneme breakdown:
@@ -83,6 +94,7 @@ Your task:
 3. If there are weak phonemes, gently explain how to make that sound correctly. Use simple, fun descriptions a child can understand (e.g., "make your lips like a fish" or "let air blow through your teeth like wind").
 4. Give one simple tip or exercise they can try right now to improve.
 5. End with a motivating sentence that encourages them to try again.
+6. If the child's name is available, naturally use it once in the feedback to make it more personal.
 
 Rules:
 - Use very simple words. No medical jargon.

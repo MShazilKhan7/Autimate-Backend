@@ -132,10 +132,12 @@ export const getSessionByUserAndWord = async (req, res) => {
       wordId,
     });
 
+    // No session yet -> valid state, not an error
     if (!session) {
-      return res.status(404).json({
-        success: false,
-        message: "Session not found",
+      return res.status(200).json({
+        success: true,
+        data: null,
+        message: "No session found for this word",
       });
     }
 
