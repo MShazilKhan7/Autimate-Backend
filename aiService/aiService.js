@@ -32,7 +32,7 @@ const buildFeedbackPrompt = (scoreReport) => {
   const phonemeDetails = phoneScores
     .map(
       (p) =>
-        `  - Phoneme "/${p.phone}/": score ${round(p.quality_score)}/100, heard as "/${p.sound_most_like}/"`,
+        `  - Phoneme "/${p.phone}/": score ${Math.round(p.quality_score)}/100, heard as "/${p.sound_most_like}/"`,
     )
     .join("\n");
 
