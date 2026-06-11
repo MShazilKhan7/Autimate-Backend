@@ -37,7 +37,7 @@ const buildFeedbackPrompt = (scoreReport) => {
     .join("\n");
 
   const weakDetails = weakPhonemes
-    .map((p) => `"/${p.phone}/" (scored ${round(p.quality_score)}/100)`)
+    .map((p) => `"/${p.phone}/" (scored ${Math.round(p.quality_score)}/100)`)
     .join(", ");
 
   const previousAttemptsText =
@@ -47,13 +47,13 @@ const buildFeedbackPrompt = (scoreReport) => {
             const phoneBreakdown = attempt.phone_score_list
               .map(
                 (p) =>
-                  `     - /${p.phone}/ → ${round(p.quality_score)}/100, heard as /${p.sound_most_like}/`,
+                  `     - /${p.phone}/ → ${Math.round(p.quality_score)}/100, heard as /${p.sound_most_like}/`,
               )
               .join("\n");
 
             return `
 Previous Attempt ${index + 1}:
-Overall Score: ${round(attempt.quality_score)}/100
+Overall Score: ${Math.round(attempt.quality_score)}/100
 Result: ${attempt.quality_class}
 
 Phone Breakdown:
